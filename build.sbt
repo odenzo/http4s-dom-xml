@@ -1,15 +1,23 @@
-import sbt.*
-import Libs.*
+import sbt._
 
 import MyCompileOptions.{optV2, optV3}
 import sbt.Keys.libraryDependencies
-ThisBuild / scalaVersion := "2.13.8"
-lazy val supportedScalaVersions = List("2.13.8", "3.1.2")
-val javart                      = "1.11"
+ThisBuild / scalaVersion       := "2.13.8"
+ThisBuild / crossScalaVersions := List("2.13.8", "3.1.2")
+val javart = "1.11"
 
-ThisBuild / versionScheme    := Some("semver-spec")
-ThisBuild / githubOwner      := "odenzo"
-ThisBuild / githubRepository := "http4s-dom-xml"
+ThisBuild / versionScheme        := Some("semver-spec")
+credentials += Credentials(Path.userHome / ".sbt" / "1.0" / "github.sbt")
+//ThisBuild / githubOwner       := "odenzo"
+//ThisBuild / githubRepository  := "http4s-dom-xml"
+//ThisBuild / githubTokenSource := TokenSource.GitConfig("github.token")
+ThisBuild / pomIncludeRepository := (_ => false)
+ThisBuild / publishMavenStyle    := true
+ThisBuild / organization         := "com.odenzo"
+val gitHubMaven: MavenRepository = ("GitHub Package Registry" at "https://maven.pkg.github.com/odenzo/http4s-dom-xml")
+
+ThisBuild / publishTo := Some(gitHubMaven)
+ThisBuild / resolvers += gitHubMaven
 
 inThisBuild {
   resolvers += Resolver.mavenLocal
@@ -31,7 +39,7 @@ inThisBuild {
 lazy val root = project
   .in(file("."))
   .aggregate(xml.jvm, xml.js)
-  .settings(name := "http4s-dom-project", crossScalaVersions := supportedScalaVersions, doc / aggregate := false, publish / skip := true)
+  .settings(name := "http4s-dom-project", doc / aggregate := false, publish / skip := true)
 
 lazy val xml = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
