@@ -9,7 +9,7 @@ class SAComplianceConvertorHackTest extends munit.FunSuite {
   // Test just to see if can parse XML document without errors.
   // Expand later into running JS and JVM parsing, printing results and making sure that are equal.
 
-  test("Loading and Writing") {
+  test("Loading and Writing".ignore) {
     val variables: String = Range(1, 120)
       .map { i =>
 

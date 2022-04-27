@@ -46,3 +46,10 @@ There is no server example, because there is no ScaleJS env server :-)
 ## TODO
 - Clean up this mess and move to a new repo
 - Add invalid XML document suite which should also pass when in no validation mode
+
+
+## Testing
+Uses NodeJS environment.
+
+npm install jsdom  // Not needed because: libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
+npm install jks-js 

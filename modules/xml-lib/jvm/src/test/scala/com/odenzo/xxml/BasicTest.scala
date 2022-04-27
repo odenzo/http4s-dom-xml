@@ -2,7 +2,7 @@ package com.odenzo.xxml
 
 import com.odenzo.xxml.{TestData, XXMLParser}
 
-import scala.xml.{Document, Elem, Group, Node, NodeSeq, SpecialNode}
+import scala.xml.*
 
 class BasicTest extends munit.FunSuite {
   // Hmm. dunno how to debug test this in Node env.

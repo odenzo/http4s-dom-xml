@@ -3,9 +3,9 @@ package com.odenzo.xxml
 /** Parses basic XML to ScalaXML. ScalaXML is x-platform, but the parser isn't. This is just a helper in case you are parsing manually
   * instead of using the build-in EntityDecoder/Encoder from HTTP4S on the JVM
   */
-object XXMLParser extends com.odenzo.xxml.XXMLParserInterface {
+object XXMLParser {
 
-  import javax.xml.parsers.{SAXParser, SAXParserFactory}
+  import javax.xml.parsers.SAXParserFactory
   import scala.xml.factory.XMLLoader
   import scala.xml.{Elem, XML}
 
