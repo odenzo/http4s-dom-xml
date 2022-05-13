@@ -1,7 +1,8 @@
 # HTTP4S V1.xx XML EntityDecoder and EntityEncoder for ScalaJS
 
 ## The problem:
-scala-xml parsing isn't functional under Scala JS, but the rest is.
+scala-xml parsing isn't functional under Scala JS, but the rest (mostly) of scala-xml is. So we replace its JVM Sax parser
+with the ScalaJD DOMParser and convert DOMParsers DOM to scala.xml's DOM.
 
 ## Design Criteria
 + Handle XML with internal DTD entity refs, but do not allow non-standalone documents (no external calls)
@@ -32,6 +33,34 @@ want. Generally the scala-xml DOM is easier IMHO, although it too is littered wi
 + Minimal dependencies, only Cats and scala-jsdom 
 
 
+## Testing
+Lost of travails with IJ and ScalaJS in testing, even with SBT.
+Instead I have written a "demo" program seperately that does the testing in a real HTTP Client/Server scenario.
+Most testing here is in the JVM, since testing in Node is not particularly helpful, and also I am not sure how to test in browser.
+
+
+Getting dilemma that something is wanting: Node Path and Process imports in jsDom env, but switching to Node env and missing the DOMParser
+Even in NodeJS environment if I install jsdom I am having this trouble still. All to test on a simulation of a browser.
+Thus the seperate project.
+
+So, these ended up being trial and error, take with a grain of salt.
+### Node Setup
+I need to manually install jsdom, I used Node 16LTS(Gallium)  (Node17 autoupdated and screwed up everything)
+- `npm install jsdom`  
+- `npm install jsdom -save-dev`
+- `npm install source-map-support`
+
++ I want to run unit tests under ScalaJS and JVM. JVM is not much problem using MUnit:
+  - ThisBuild / jsEnv              := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+  - jsEnv                          := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+
+
+Uses NodeJS environment.
+
+npm install jsdom  // Not needed because: libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
+npm install jks-js
+
+
 
 ## Example Usage
 
@@ -48,8 +77,5 @@ There is no server example, because there is no ScaleJS env server :-)
 - Add invalid XML document suite which should also pass when in no validation mode
 
 
-## Testing
-Uses NodeJS environment.
 
-npm install jsdom  // Not needed because: libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
-npm install jks-js 
+

@@ -1,11 +1,15 @@
-import sbt._
-
+import sbt.*
 import MyCompileOptions.{optV2, optV3}
+import org.scalajs.jsenv.nodejs.NodeJSEnv
 import sbt.Keys.libraryDependencies
 ThisBuild / scalaVersion       := "3.1.2"
 ThisBuild / crossScalaVersions := List("3.1.2")
-ThisBuild / jsEnv              := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
-ThisBuild / scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) } // Needed for NodeJS in Test at least?
+
+//ThisBuild / jsEnv := new NodeJSEnv()
+//jsEnv             := new NodeJSEnv()
+
+ThisBuild / scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) } // Needed for NodeJS in Test at least?
+scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }             // Needed for NodeJS in Test at least?
 val javart = "1.11"
 
 ThisBuild / versionScheme        := Some("semver-spec")
@@ -20,7 +24,7 @@ val gitHubMaven: MavenRepository = ("GitHub Package Registry" at "https://maven.
 
 // I thought this no longer needed, but testOnly works on classname only without it
 ThisBuild / testFrameworks += new TestFramework("munit.Framework")
-//Test / requireJsDomEnv := true
+
 ThisBuild / publishTo := Some(gitHubMaven)
 ThisBuild / resolvers += gitHubMaven
 
@@ -41,36 +45,31 @@ inThisBuild {
 
   scalacOptions ++= Seq("-release", "11")
 }
-lazy val root = project
-  .in(file("."))
-  .aggregate(xml.jvm, xml.js)
-  .settings(name := "http4s-dom-project", doc / aggregate := false, publish / skip := true)
 
-lazy val xml = crossProject(JSPlatform, JVMPlatform)
+lazy val xxml = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
-  .in(file("modules/xml-lib"))
+  .in(file("."))
   .settings(
     name := "http4s-dom-xml",
     libraryDependencies ++= Seq(
       XLib.cats.value,
       XLib.catsEffect.value,
       XLib.scalaXML.value,
-      XLib.http4sCore.value,
-      //   "co.fs2"        %%% "fs2-core"                % V.fs2   % Test,
-      //  "co.fs2"        %%% "fs2-io"                  % V.fs2   % Test,
-      "org.typelevel" %%% "scalacheck-effect-munit" % "1.0.3" % Test,
-      "org.typelevel" %%% "munit-cats-effect-3"     % "1.0.7" % Test
+      XLib.http4sCore.value, // Definatelty need this.
+      "org.typelevel" %%% "munit-cats-effect-3" % "1.0.7" % Test
     )
   )
   // .jsEnablePlugins(ScalaJSBundlerPlugin)
   .jsSettings(
-    Test / fork  := false,
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-    Test / scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-    jsEnv        := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
-    Test / jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
-    libraryDependencies ++= Seq("org.scala-js" %%% "scalajs-dom" % "2.1.0", "org.http4s" %%% "http4s-dom" % V.http4sDom)
+    // jsEnv                                  := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+    jsEnv                                  := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+    // jsEnv                                  := new NodeJSEnv(),
+    // scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
+    Test / fork                            := false,
+    //  libraryDependencies += "org.http4s"   %%% "http4s-dom"  % V.http4sDom, // Not sure I need this
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.1.0" // Shouldn't this be bundled into Node?
   )
   .jvmSettings(libraryDependencies ++= Seq("org.http4s" %% "http4s-scala-xml" % V.http4s))
 
-addCommandAlias("to", "xmlJS/testOnly -- --tests=")
+addCommandAlias("to", "xxmlJS/testOnly -- --tests=")
