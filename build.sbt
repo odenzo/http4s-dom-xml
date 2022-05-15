@@ -1,29 +1,29 @@
 import sbt.*
 import MyCompileOptions.{optV2, optV3}
-import org.scalajs.jsenv.nodejs.NodeJSEnv
 import sbt.Keys.libraryDependencies
 ThisBuild / scalaVersion       := "3.1.2"
-ThisBuild / crossScalaVersions := List("3.1.2")
+ThisBuild / crossScalaVersions := List("3.1.2", "2.13.8")
 
-//ThisBuild / jsEnv := new NodeJSEnv()
-//jsEnv             := new NodeJSEnv()
-
-ThisBuild / scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) } // Needed for NodeJS in Test at least?
-scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }             // Needed for NodeJS in Test at least?
 val javart = "1.11"
 
-ThisBuild / versionScheme        := Some("semver-spec")
+ThisBuild / versionScheme     := Some("semver-spec")
 credentials += Credentials(Path.userHome / ".sbt" / "1.0" / "github.sbt")
 //ThisBuild / githubOwner       := "odenzo"
 //ThisBuild / githubRepository  := "http4s-dom-xml"
 //ThisBuild / githubTokenSource := TokenSource.GitConfig("github.token")
-ThisBuild / pomIncludeRepository := (_ => false)
-ThisBuild / publishMavenStyle    := true
-ThisBuild / organization         := "com.odenzo"
+//ThisBuild / pomIncludeRepository := (_ => false)
+ThisBuild / publishMavenStyle := true
+ThisBuild / organization      := "com.odenzo"
 val gitHubMaven: MavenRepository = ("GitHub Package Registry" at "https://maven.pkg.github.com/odenzo/http4s-dom-xml")
 
-// I thought this no longer needed, but testOnly works on classname only without it
-ThisBuild / testFrameworks += new TestFramework("munit.Framework")
+// Because PublishM2 is writing the POM twice under the Java branch. Guess it doesn't like a single root project?
+//  [error] stack trace is suppressed; run last xxmlJS / publishM2 for the full output
+//  [error] stack trace is suppressed; run last xxmlJVM / publishM2 for the full output
+//  [error] stack trace is suppressed; run last publishM2 for the full output
+// Beta bugs, or am I suppose to supress publishing in cross-platform shared code.
+ThisBuild / publishConfiguration      := publishConfiguration.value.withOverwrite(true)
+ThisBuild / publishM2Configuration    := publishM2Configuration.value.withOverwrite(true)
+ThisBuild / publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
 
 ThisBuild / publishTo := Some(gitHubMaven)
 ThisBuild / resolvers += gitHubMaven
@@ -59,16 +59,13 @@ lazy val xxml = crossProject(JSPlatform, JVMPlatform)
       "org.typelevel" %%% "munit-cats-effect-3" % "1.0.7" % Test
     )
   )
-  // .jsEnablePlugins(ScalaJSBundlerPlugin)
   .jsSettings(
-    // jsEnv                                  := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
     jsEnv                                  := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
-    // jsEnv                                  := new NodeJSEnv(),
-    // scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    Test / scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.NoModule) },
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
-    Test / fork                            := false,
-    //  libraryDependencies += "org.http4s"   %%% "http4s-dom"  % V.http4sDom, // Not sure I need this
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.1.0" // Shouldn't this be bundled into Node?
+    Test / fork                            := false, // Required
+    // libraryDependencies += "org.http4s"   %%% "http4s-dom"  % V.http4sDom, // Not sure I need this
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.1.0"
   )
   .jvmSettings(libraryDependencies ++= Seq("org.http4s" %% "http4s-scala-xml" % V.http4s))
 
